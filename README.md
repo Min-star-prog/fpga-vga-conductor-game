@@ -4,7 +4,20 @@ OV7670 카메라로 지휘봉과 손의 움직임을 인식하고, 지휘 동작
 
 > 7명이 함께 카메라/VGA, 색상 및 좌표 검출, 지휘 패턴, 속도·음량·점수 계산, UART, PC UI와 검증 환경을 분담하여 개발했습니다.
 
-[시연 영상](<docs/demo/지휘게임 시연영상.mp4>) · [프로젝트 발표 자료](docs/ppt/3팀_지휘시뮬레이션게임.pdf)
+[시연 영상](<docs/demo/지휘게임 시연영상.mp4>) · [프로젝트 발표 자료](docs/ppt/3팀_지휘시뮬레이션게임.pdf) · [노션 상세](https://app.notion.com/p/3d423ec941b781d2a2a5fcb84437ab55) · [전체 포트폴리오](https://app.notion.com/p/09623ec941b782e6a750819f197c7713)
+
+## 이민 담당 역할과 검증 결과
+
+| 담당 | 수행 내용 | 관련 코드 |
+| --- | --- | --- |
+| 지휘 패턴 FSM | 지휘봉의 Zone 순서와 상태 전이를 판정하고 Pattern Tick 생성 | [pattern_stick.sv](rtl/game/pattern_stick.sv) |
+| Tick·Valid 제어 | 패턴 이벤트와 유효 데이터를 다음 모듈에 전달하고 연동 시점 정리 | [pattern_stick.sv](rtl/game/pattern_stick.sv), [game_logic.sv](rtl/game/game_logic.sv) |
+| 점수 계산 RTL | 지휘 속도를 수집하고 평균·기준 BPM 차이로 점수 갱신, Valid/Ready 처리 | [game_score.sv](rtl/game/game_score.sv) |
+| Game Logic UVM | 제어부 상태·출력 비교, Random/Directed 시나리오와 미도달 Coverage 보완 | [game_logic_pkg.sv](tb/uvm/uvm_game_logic/game_logic_pkg.sv), [tb_top.sv](tb/uvm/uvm_game_logic/tb_top.sv) |
+
+당시 제어부 검증 기록은 **Scoreboard 657,780건 PASS / FAIL 0건**, **Functional Coverage 75.0% → 98.96%**입니다. 구성한 제어부 6개 모듈의 검증 범위이며, 전체 영상 처리 경로의 Coverage와는 구분합니다. [검증 범위·결과 자료](https://app.notion.com/p/3d423ec941b781d2a2a5fcb84437ab55)
+
+카메라·좌표 검출·속도·음량·UART·PC UI 등 전체 시스템은 팀에서 분담했으며, 팀원별 기여는 아래 표에 정리했습니다.
 
 ## 구현 화면
 
@@ -285,6 +298,8 @@ Windows에서 MIDI 소리가 나지 않는다면 시스템의 MIDI 출력 장치
 
 단위 테스트는 Vivado Simulator 등 SystemVerilog 지원 시뮬레이터에서 실행할 수 있습니다. UVM 테스트는 UVM 1.2를 지원하는 시뮬레이터가 필요하며, `uvm_game_logic`의 Makefile은 VCS/Verdi 환경을 기준으로 작성되어 있습니다.
 
+현재 `uvm_game_logic/Makefile`과 `files.f`에는 정리 전 `tb_ai`·`rtl` 상대 경로가 남아 있습니다. 재실행 전 현재의 `tb/uvm/uvm_game_logic`·`rtl/game` 구조에 맞춰 경로를 조정해야 합니다. 위 수치는 당시 검증 기록이며, 이 공개 폴더에서 새로 실행해 얻은 결과로 표기하지 않았습니다.
+
 ## 팀 구성 및 담당 영역
 
 아래 내용은 Git 커밋 이력을 기준으로 정리한 주요 기여 영역입니다. `hans`와 `realisshoon`은 동일 이메일의 계정 별칭으로 하나의 팀원으로 집계했습니다.
@@ -299,10 +314,8 @@ Windows에서 MIDI 소리가 나지 않는다면 시스템의 MIDI 출력 장치
 | 유지민 [@jimin-max](https://github.com/jimin-max)         | 지휘 속도 계산 모듈 초기 구현 및 단위 테스트                                           |
 | 한승훈 [@realisshoon](https://github.com/realisshoon)     | 저장소 및 브랜치 통합, RGB 필터, 좌표 검출 통합, Top 모듈, RTL-PC 통합, RGB detect UVM |
 
-## 브랜치 전략
+## 공개 브랜치와 개발 기록
 
-- `main`: 정상 동작이 확인된 최종 안정 버전
-- `integration`: 기능 통합 및 FPGA 검증 브랜치
-- `feat/*`: 기능별 개발 브랜치
+이 개인 저장소는 `integration`을 기본 공개 브랜치로 사용합니다. 현재 공개된 코드·테스트벤치·시연 자료는 이 브랜치에서 확인할 수 있습니다.
 
-개발 기능은 `feat/* → integration → main` 순서로 통합하고, Pull Request에서 시뮬레이션·인터페이스·FPGA 동작 여부를 확인했습니다.
+팀 개발 과정에서는 기능별 브랜치와 통합 검토를 사용했습니다. 아래 팀원별 기여와 기존 Git 이력은 함께 보존합니다.
